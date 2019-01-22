@@ -25,3 +25,8 @@ $ npm start
 # If not visit your localhost:3000
 $ http://localhost:3000
 ```
+
+### Todo
+
+  - Write tests
+  - Improve types definition for the whole app
