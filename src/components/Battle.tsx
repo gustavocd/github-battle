@@ -4,7 +4,7 @@ import PlayerPreview from './PlayerPreview';
 
 interface IPlayerInputProps {
   id: string;
-  onSubmit: Function;
+  onSubmit: (id: string, username: string) => void;
   label: string;
 };
 
