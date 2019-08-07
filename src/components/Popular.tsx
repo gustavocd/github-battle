@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import Loading from './Loading';
 import api from '../utils/api';
 
@@ -65,55 +65,37 @@ function RepoGrid(props: IRepoGrid) {
   );
 }
 
-interface IPopularProps {};
 
-interface IPopularState {
-  selectedLanguage: string;
-  repos: [Repo] | null;
-};
+function Popular() {
+  const [selectedLanguage, setSelectedLanguage] = useState('All');
+  const [repos, setRepos] = useState<[Repo] | null>(null);
 
-class Popular extends Component<IPopularProps, IPopularState> {
-  constructor(props: IPopularProps) {
-    super(props);
-    this.state = {
-      selectedLanguage: 'All',
-      repos: null,
-    }
-    this.updateLanguage = this.updateLanguage.bind(this);
-  }
+  useEffect(() => {
+    updateLanguage(selectedLanguage);
+  }, []);
 
-  componentDidMount() {
-    const { selectedLanguage } = this.state;
-    this.updateLanguage(selectedLanguage);
-  }
-
-  updateLanguage(lang: string) {
-    this.setState(() => ({
-      selectedLanguage: lang,
-      repos: null,
-    }));
+  const updateLanguage = (lang: string) => {
+    setSelectedLanguage(lang);
+    setRepos(null);
 
     api
       .fetchPopularRepos(lang)
-      .then(repos => this.setState({ repos }))
+      .then(setRepos)
       .catch(error => console.error(error));
   }
 
-  render() {
-    const { selectedLanguage, repos } = this.state;
-    return (
-      <Fragment>
-        <SelectLanguage
-          selectedLanguage={selectedLanguage}
-          updateLanguage={this.updateLanguage}
-        />
-        {!repos
-          ? <Loading />
-          : <RepoGrid repos={repos} />
-        }
-      </Fragment>
-    );
-  }
+  return (
+    <Fragment>
+      <SelectLanguage
+        selectedLanguage={selectedLanguage}
+        updateLanguage={updateLanguage}
+      />
+      {!repos
+        ? <Loading />
+        : <RepoGrid repos={repos} />
+      }
+    </Fragment>
+  );
 }
 
 export default Popular;

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, ChangeEvent, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import PlayerPreview from './PlayerPreview';
 
@@ -8,56 +8,40 @@ interface IPlayerInputProps {
   label: string;
 };
 
-interface IPlayerInputState {
-  username: string;
-};
+function PlayerInput(props: IPlayerInputProps) {
+  const { label } = props;
+  const [username, setUsername] = useState('');
 
-class PlayerInput extends Component<IPlayerInputProps, IPlayerInputState> {
-  constructor(props: IPlayerInputProps) {
-    super(props);
-    this.state = {
-      username: '',
-    }
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const value = event.target.value;
-    this.setState({ username: value });
-  }
-
-  handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const { username } = this.state;
-    const { onSubmit, id } = this.props;
+    const { onSubmit, id } = props;
     onSubmit(id, username);
   }
 
-  render() {
-    const { label } = this.props;
-    const { username } = this.state;
-    return (
-      <form className='column' onSubmit={this.handleSubmit}>
-        <label className='header' htmlFor='username'>{label}</label>
-        <input
-          id='username'
-          placeholder='github username'
-          type='text'
-          value={username}
-          autoComplete='off'
-          onChange={this.handleChange}
-        />
-        <button
-          className='button'
-          type='submit'
-          disabled={!username}>
-            Submit
-        </button>
-      </form>
-    );
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setUsername(value);
   }
+
+  return (
+    <form className='column' onSubmit={handleSubmit}>
+      <label className='header' htmlFor='username'>{label}</label>
+      <input
+        id='username'
+        placeholder='github username'
+        type='text'
+        value={username}
+        autoComplete='off'
+        onChange={handleChange}
+      />
+      <button
+        className='button'
+        type='submit'
+        disabled={!username}>
+          Submit
+      </button>
+    </form>
+  );
 }
 
 interface IBattleProps {
@@ -72,72 +56,69 @@ interface IBattleState {
   [propName: string]: any;
 };
 
-class Battle extends Component<IBattleProps, IBattleState> {
-  constructor(props: IBattleProps) {
-    super(props);
-    this.state = {
-      playerOneName: '',
-      playerTwoName: '',
-      playerOneImage: null,
-      playerTwoImage: null,
+function Battle(props: IBattleProps) {
+  const [playerOneName, setPlayerOneName] = useState('');
+  const [playerTwoName, setPlayerTwoName] = useState('');
+  const [playerOneImage, setPlayerOneImage] = useState('');
+  const [playerTwoImage, setPlayerTwoImage] = useState('');
+
+  const handleSubmit = (id: string, username: string): void => {
+    if (id === 'playerOne') {
+      setPlayerOneName(username);
+      setPlayerOneImage(`https://github.com/${username}.png?size=200`);
+    } else {
+      setPlayerTwoName(username);
+      setPlayerTwoImage(`https://github.com/${username}.png?size=200`);
     }
   }
 
-  handleSubmit = (id: string, username: string): void => {
-    this.setState({
-      [id + 'Name']: username,
-      [id + 'Image']: `https://github.com/${username}.png?size=200`,
-    });
+  const handleReset = (player: string) => {
+    if (player === 'playerOne') {
+      setPlayerOneName('');
+      setPlayerOneImage('');
+    } else {
+      setPlayerTwoName('');
+      setPlayerTwoImage('');
+    }
   }
 
-  handleReset = (id: string): void => {
-    this.setState({
-      [id + 'Name']: '',
-      [id + 'Image']: null,
-    });
-  }
-
-  render() {
-    const { match } = this.props;
-    const { playerOneName, playerTwoName, playerOneImage, playerTwoImage } = this.state;
-    return (
-      <div>
-        <div className='row'>
-          {!playerOneName &&
-            <PlayerInput
-              id='playerOne'
-              label='Player One'
-              onSubmit={this.handleSubmit}
-            />}
-          {playerOneImage !== null &&
+  return (
+    <div>
+      <div className='row'>
+        {!playerOneName &&
+          <PlayerInput
+            id='playerOne'
+            label='Player One'
+            onSubmit={handleSubmit}
+          />}
+        {playerOneImage !== '' &&
+          <PlayerPreview
+            avatar={playerOneImage}
+            username={playerOneName}
+          >
+            <button className='reset' onClick={() => handleReset('playerOne')}>Reset</button>
+          </PlayerPreview>}
+        {!playerTwoName &&
+          <PlayerInput
+            id='playerTwo'
+            label='Player Two'
+            onSubmit={handleSubmit}
+          />}
+          {playerTwoImage !== '' &&
             <PlayerPreview
-              avatar={playerOneImage}
-              username={playerOneName}
+              avatar={playerTwoImage}
+              username={playerTwoName}
             >
-              <button className='reset' onClick={this.handleReset.bind(this, 'playerOne')}>Reset</button>
-            </PlayerPreview>}
-          {!playerTwoName &&
-            <PlayerInput
-              id='playerTwo'
-              label='Player Two'
-              onSubmit={this.handleSubmit}
-            />}
-            {playerTwoImage !== null &&
-              <PlayerPreview
-                avatar={playerTwoImage}
-                username={playerTwoName}
-              >
-                <button className='reset' onClick={this.handleReset.bind(this, 'playerTwo')}>Reset</button>
-              </PlayerPreview>}
-        </div>
-        {playerOneImage && playerTwoImage &&
-          <Link className='button' to={{
-            pathname: `${match.url}/results`,
-            search: `?playerOneName=${playerOneName}&playerTwoName=${playerTwoName}`
-          }}>Battle</Link>}
+              <button className='reset' onClick={() => handleReset('playerTwo')}>Reset</button>
+          </PlayerPreview>}
       </div>
-    )
-  }
+      {playerOneImage && playerTwoImage &&
+        <Link className='button' to={{
+          pathname: `${props.match.url}/results`,
+          search: `?playerOneName=${playerOneName}&playerTwoName=${playerTwoName}`
+        }}>Battle</Link>}
+    </div>
+  );
 }
 
 export default Battle;

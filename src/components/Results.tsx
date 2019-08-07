@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import queryString from 'query-string';
 import { Link } from 'react-router-dom';
 
@@ -76,33 +76,19 @@ interface IResultsProps {
   }
 };
 
-interface IResultsState {
-  winner: {
-    score: number;
-    profile: IProfileInfo;
-  } | null;
-  loser: {
-    score: number;
-    profile: IProfileInfo;
-  } | null;
-  error: any;
-  loading: boolean;
-};
+interface Player {
+  score: number;
+  profile: IProfileInfo;
+}
 
-class Results extends Component<IResultsProps, IResultsState> {
-  constructor(props: IResultsProps) {
-    super(props);
+function Results(props: IResultsProps) {
+  const [winner, setWinner] = useState<Player | null>(null);
+  const [loser, setLoser] = useState<Player | null>(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-    this.state = {
-      winner: null,
-      loser: null,
-      error: null,
-      loading: true,
-    }
-  }
-
-  componentDidMount() {
-    const players = queryString.parse(this.props.location.search);
+  useEffect(() => {
+    const players = queryString.parse(props.location.search);
     const { playerOneName, playerTwoName } = players;
     api
       .battle([
@@ -111,53 +97,46 @@ class Results extends Component<IResultsProps, IResultsState> {
       ])
       .then((response: any) => {
         if (response === null) {
-          return this.setState({
-            error: 'looks like there was a problem, check that both users exist on GitHub',
-            loading: false,
-          });
+          setError('looks like there was a problem, check that both users exist on GitHub');
+          setLoading(false);
+          return;
         }
 
-        this.setState({
-          error: null,
-          winner: response[0],
-          loser: response[1],
-          loading: false,
-        });
+        setError('');
+        setWinner(response[0]);
+        setLoser(response[1]);
+        setLoading(false);
       })
       .catch((error: AxiosError) => console.log(error));
+  }, []);
+
+  if (loading) {
+    return <Loading />
   }
 
-  render() {
-    const { error, winner, loading, loser } = this.state;
-
-    if (loading) {
-      return <Loading />
-    }
-
-    if (error) {
-      return (
-        <div>
-          <p>{error}</p>
-          <Link to='/battle'>Reset</Link>
-        </div>
-      )
-    }
-
+  if (error) {
     return (
-      <div className='row'>
-        <Player
-          label='Winner'
-          score={winner!.score}
-          profile={winner!.profile}
-        />
-        <Player
-          label='Loser'
-          score={loser!.score}
-          profile={loser!.profile}
-        />
+      <div>
+        <p>{error}</p>
+        <Link to='/battle'>Reset</Link>
       </div>
     )
   }
+
+  return (
+    <div className='row'>
+      <Player
+        label='Winner'
+        score={winner!.score}
+        profile={winner!.profile}
+      />
+      <Player
+        label='Loser'
+        score={loser!.score}
+        profile={loser!.profile}
+      />
+    </div>
+  );
 }
 
 export default Results;
