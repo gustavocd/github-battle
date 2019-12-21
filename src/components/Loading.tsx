@@ -23,7 +23,7 @@ function Loading(props: ILoadingProps) {
     return () => {
       clearInterval(interval);
     }
-  }, []);
+  }, [speed, text]);
 
   return (
     <p style={{ textAlign: 'center', fontSize: '35px',}}>

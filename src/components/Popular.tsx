@@ -72,7 +72,7 @@ function Popular() {
 
   useEffect(() => {
     updateLanguage(selectedLanguage);
-  }, []);
+  }, [selectedLanguage]);
 
   const updateLanguage = (lang: string) => {
     setSelectedLanguage(lang);
