@@ -1,4 +1,4 @@
-### Github Battle
+### Github Battle ![](https://github.com/gustavocd/github-battle/workflows/Github%20Battle/badge.svg)
 
 This is a simple application that make use of [GitHub API](https://developer.github.com/v3/) written in [Typescript](https://www.typescriptlang.org/) and [ReactJS](https://reactjs.org/).
 
