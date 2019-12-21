@@ -1,4 +1,4 @@
-import React, { Component, useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import PlayerPreview from './PlayerPreview';
 
@@ -46,14 +46,6 @@ function PlayerInput(props: IPlayerInputProps) {
 
 interface IBattleProps {
   match: { url: string };
-};
-
-interface IBattleState {
-  playerOneName: string;
-  playerTwoName: string;
-  playerOneImage: string | null;
-  playerTwoImage: string | null;
-  [propName: string]: any;
 };
 
 function Battle(props: IBattleProps) {
