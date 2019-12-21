@@ -30,3 +30,5 @@ jobs:
         npm test
       env:
         CI: true
+        REACT_APP_ID: ${{ secrets.REACT_APP_ID }}
+        REACT_APP_SEC: ${{ secrets.REACT_APP_SEC }}
